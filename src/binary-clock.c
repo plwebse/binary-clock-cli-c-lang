@@ -26,7 +26,7 @@ void updateArray(int hours, int minutes, int seconds)
     }
 }
 
-int printClockArray()
+int printClockArray(void)
 {
     size_t written = 0;
     written += snprintf(buf + written, sizeof(buf) - written, "V HHMMSS\n");
