@@ -1,54 +1,46 @@
 #include <stdio.h>
 #include <time.h>
 
-#if defined(_WIN32)
-#include <windows.h>
-#define sleep_ms(ms) Sleep(ms)
-#else
-#include <unistd.h>
-#define sleep_ms(ms) usleep((ms) * 1000)
-#endif
-
 #define COLS 6
 #define ROWS 4
-#define BUFFER_SIZE (COLS + 1 * ROWS)
-int binaryClockArray[COLS][ROWS];
+#define BUFFER_SIZE ((COLS + 4) * (ROWS + 2))
 
-char buffer[BUFFER_SIZE];
+unsigned int binaryClockArray[COLS][ROWS];
 
-int updateColumnInArray(int column, int value)
+char buf[BUFFER_SIZE];
+
+void updateColumnInArray(int column, int value)
 {
-    binaryClockArray[column][3] = (value % 2 != 0) ? 1 : 0;
-    binaryClockArray[column][2] = (value == 2 || value == 3 || value == 6 || value == 7) ? 1 : 0;
-    binaryClockArray[column][1] = (value == 4 || value == 5 || value == 6 || value == 7) ? 1 : 0;
-    binaryClockArray[column][0] = (value == 8 || value == 9) ? 1 : 0;
-
-    return 0;
+    binaryClockArray[column][3] = (value >> 0) & 1;
+    binaryClockArray[column][2] = (value >> 1) & 1;
+    binaryClockArray[column][1] = (value >> 2) & 1;
+    binaryClockArray[column][0] = (value >> 3) & 1;
 }
 
-int updateArray(int hours, int minutes, int seconds)
+void updateArray(int hours, int minutes, int seconds)
 {
-    updateColumnInArray(0, hours / 10);
-    updateColumnInArray(1, hours % 10);
-    updateColumnInArray(2, minutes / 10);
-    updateColumnInArray(3, minutes % 10);
-    updateColumnInArray(4, seconds / 10);
-    updateColumnInArray(5, seconds % 10);
-    return 0;
+    int clock[COLS] = {hours / 10, hours % 10, minutes / 10, minutes % 10, seconds / 10, seconds % 10};
+    for (int i = 0; i < COLS; i++)
+    {
+        updateColumnInArray(i, clock[i]);
+    }
 }
 
 int printClockArray()
 {
-    unsigned long written = 0;
-    for (int r = 0; r < ROWS; r++)
+    size_t written = 0;
+    written += snprintf(buf + written, sizeof(buf) - written, "V HHMMSS\n");
+    for (unsigned int r = 0; r < ROWS; r++)
     {
+        written += snprintf(buf + written, sizeof(buf) - written, "%d ", (1 << (3 - r)));
         for (int c = 0; c < COLS; c++)
         {
-            written += snprintf(buffer + written, sizeof(buffer), "%d", binaryClockArray[c][r]);
+            written += snprintf(buf + written, sizeof(buf) - written, "%d", binaryClockArray[c][r]);
         }
-        written += snprintf(buffer + written, sizeof(buffer), "\n");
+        written += snprintf(buf + written, sizeof(buf) - written, "\n");
     }
 
+    written += snprintf(buf + written, sizeof(buf) - written, "________\n");
     return written;
 }
 
@@ -60,8 +52,7 @@ int main(void)
     timeinfo = localtime(&rawtime);
     updateArray(timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
     printClockArray();
-    printf("%s", buffer);
-    printf("%s", "______\n");    
+    printf("%s", buf);
 
     return 0;
 }
