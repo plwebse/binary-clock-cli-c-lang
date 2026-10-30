@@ -18,41 +18,10 @@ char buffer[BUFFER_SIZE];
 
 int updateColumnInArray(int column, int value)
 {
-    if (value % 2 != 0)
-    {
-        binaryClockArray[column][3] = 1;
-    }
-    else
-    {
-        binaryClockArray[column][3] = 0;
-    }
-
-    if (value == 2 || value == 3 || value == 6 || value == 7)
-    {
-        binaryClockArray[column][2] = 1;
-    }
-    else
-    {
-        binaryClockArray[column][2] = 0;
-    }
-
-    if (value == 4 || value == 5 || value == 6 || value == 7)
-    {
-        binaryClockArray[column][1] = 1;
-    }
-    else
-    {
-        binaryClockArray[column][1] = 0;
-    }
-
-    if (value == 8 || value == 9)
-    {
-        binaryClockArray[column][0] = 1;
-    }
-    else
-    {
-        binaryClockArray[column][0] = 0;
-    }
+    binaryClockArray[column][3] = (value % 2 != 0) ? 1 : 0;
+    binaryClockArray[column][2] = (value == 2 || value == 3 || value == 6 || value == 7) ? 1 : 0;
+    binaryClockArray[column][1] = (value == 4 || value == 5 || value == 6 || value == 7) ? 1 : 0;
+    binaryClockArray[column][0] = (value == 8 || value == 9) ? 1 : 0;
 
     return 0;
 }
@@ -78,26 +47,21 @@ int printClockArray()
             written += snprintf(buffer + written, sizeof(buffer), "%d", binaryClockArray[c][r]);
         }
         written += snprintf(buffer + written, sizeof(buffer), "\n");
-    }    
+    }
 
     return written;
 }
 
 int main(void)
 {
-
-    for (size_t i = 0; i < 20; i++)
-    {
-        time_t rawtime;
-        struct tm *timeinfo;
-        time(&rawtime);
-        timeinfo = localtime(&rawtime);
-        updateArray(timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-        printClockArray();
-        printf("%s", buffer);
-        printf("%s", "______\n");
-        sleep_ms(1000);
-    }
+    time_t rawtime;
+    struct tm *timeinfo;
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    updateArray(timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+    printClockArray();
+    printf("%s", buffer);
+    printf("%s", "______\n");    
 
     return 0;
 }
