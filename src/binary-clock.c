@@ -29,18 +29,25 @@ void updateArray(int hours, int minutes, int seconds)
 int printClockArray(void)
 {
     size_t written = 0;
-    written += snprintf(buf + written, sizeof(buf) - written, "V HHMMSS\n");
+    int res = 0;
+    res = snprintf(buf + written, sizeof(buf) - written, "V HHMMSS\n");
+    written += (res > 0 && res < sizeof(buf) - written) ? (size_t)res : 0;
+    
     for (unsigned int r = 0; r < ROWS; r++)
     {
-        written += snprintf(buf + written, sizeof(buf) - written, "%d ", (1 << (3 - r)));
+        res = snprintf(buf + written, sizeof(buf) - written, "%d ", (1 << (3 - r)));
+        written += (res > 0 && res < sizeof(buf) - written) ? (size_t)res : 0;
         for (int c = 0; c < COLS; c++)
         {
-            written += snprintf(buf + written, sizeof(buf) - written, "%d", binaryClockArray[c][r]);
+            res = snprintf(buf + written, sizeof(buf) - written, "%d", binaryClockArray[c][r]);
+            written += (res > 0 && res < sizeof(buf) - written) ? (size_t)res : 0;
         }
-        written += snprintf(buf + written, sizeof(buf) - written, "\n");
+        res = snprintf(buf + written, sizeof(buf) - written, "\n");
+        written += (res > 0 && res < sizeof(buf) - written) ? (size_t)res : 0;
     }
 
-    written += snprintf(buf + written, sizeof(buf) - written, "________\n");
+    res = snprintf(buf + written, sizeof(buf) - written, "________\n");
+    written += (res > 0 && res < sizeof(buf) - written) ? (size_t)res : 0;
     return written;
 }
 
