@@ -1,54 +1,68 @@
 #include <stdio.h>
 #include <time.h>
-
+#include <stdarg.h>
 #define COLS 6
 #define ROWS 4
-#define BUFFER_SIZE ((COLS + 4) * (ROWS + 2))
+#define BUFFER_SIZE (COLS + 4) * (ROWS + 2)
 
-unsigned int binaryClockArray[COLS][ROWS];
+unsigned int binary_clock_arr[COLS][ROWS];
 
 char buf[BUFFER_SIZE];
 
-void updateColumnInArray(int column, int value)
+void update_a_column_in_binary_clock_array(int column, int value)
 {
-    binaryClockArray[column][3] = (value >> 0) & 1;
-    binaryClockArray[column][2] = (value >> 1) & 1;
-    binaryClockArray[column][1] = (value >> 2) & 1;
-    binaryClockArray[column][0] = (value >> 3) & 1;
+    binary_clock_arr[column][3] = (value >> 0) & 1; // 1
+    binary_clock_arr[column][2] = (value >> 1) & 1; // 2
+    binary_clock_arr[column][1] = (value >> 2) & 1; // 4
+    binary_clock_arr[column][0] = (value >> 3) & 1; // 8
 }
 
-void updateArray(int hours, int minutes, int seconds)
+void update_binary_clock_array_with_hh_mm_ss(int hours, int minutes, int seconds)
 {
     int clock[COLS] = {hours / 10, hours % 10, minutes / 10, minutes % 10, seconds / 10, seconds % 10};
     for (int i = 0; i < COLS; i++)
     {
-        updateColumnInArray(i, clock[i]);
+        update_a_column_in_binary_clock_array(i, clock[i]);
     }
 }
 
-int printClockArray(void)
+void append_to_buffer(char *buffer, size_t buf_size, size_t *wrt_chars, const char *fmt, ...)
 {
-    size_t written = 0;
-    int res = 0;
-    res = snprintf(buf + written, sizeof(buf) - written, "V HHMMSS\n");
-    written += (res > 0 && res < sizeof(buf) - written) ? (size_t)res : 0;
-    
+    if (*wrt_chars >= buf_size)
+        return;
+
+    va_list args;
+    va_start(args, fmt);
+    int res = vsnprintf(buffer + *wrt_chars, buf_size - *wrt_chars, fmt, args);
+    va_end(args);
+
+    if (res > 0 && (size_t)res < buf_size - *wrt_chars)
+    {
+        *wrt_chars += (size_t)res;
+    }
+    else if (res > 0)
+    {
+        *wrt_chars = buf_size - 1;
+    }
+}
+
+int update_binary_clock_buffer_from_array(void)
+{
+    size_t wrt_chars = 0;
+
+    append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "V HHMMSS\n");
     for (unsigned int r = 0; r < ROWS; r++)
     {
-        res = snprintf(buf + written, sizeof(buf) - written, "%d ", (1 << (3 - r)));
-        written += (res > 0 && res < sizeof(buf) - written) ? (size_t)res : 0;
+        append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "%d ", (1 << (3 - (int)r)));
         for (int c = 0; c < COLS; c++)
         {
-            res = snprintf(buf + written, sizeof(buf) - written, "%d", binaryClockArray[c][r]);
-            written += (res > 0 && res < sizeof(buf) - written) ? (size_t)res : 0;
+            append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "%d", binary_clock_arr[c][r]);
         }
-        res = snprintf(buf + written, sizeof(buf) - written, "\n");
-        written += (res > 0 && res < sizeof(buf) - written) ? (size_t)res : 0;
+        append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "\n");
     }
 
-    res = snprintf(buf + written, sizeof(buf) - written, "________\n");
-    written += (res > 0 && res < sizeof(buf) - written) ? (size_t)res : 0;
-    return written;
+    append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "________\n");
+    return wrt_chars;
 }
 
 int main(void)
@@ -57,8 +71,8 @@ int main(void)
     struct tm *timeinfo;
     time(&rawtime);
     timeinfo = localtime(&rawtime);
-    updateArray(timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-    printClockArray();
+    update_binary_clock_array_with_hh_mm_ss(timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+    update_binary_clock_buffer_from_array();
     printf("%s", buf);
 
     return 0;
