@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #define COLS 6
 #define ROWS 4
-#define BUFFER_SIZE (COLS + 4) * (ROWS + 2)
+#define BUFFER_SIZE (COLS + 4) * (ROWS + 3)
 
 unsigned int binary_clock_arr[COLS][ROWS];
 
@@ -46,10 +46,12 @@ void append_to_buffer(char *buffer, size_t buf_size, size_t *wrt_chars, const ch
     }
 }
 
-int update_binary_clock_buffer_from_array(void)
+int update_binary_clock_buffer_from_array(int hours, int minutes, int seconds)
 {
     size_t wrt_chars = 0;
 
+    append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "%02d:%02d:%02d\n", hours, minutes, seconds);
+    append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "--------\n");
     append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "V HHMMSS\n");
     for (unsigned int r = 0; r < ROWS; r++)
     {
@@ -60,8 +62,6 @@ int update_binary_clock_buffer_from_array(void)
         }
         append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "\n");
     }
-
-    append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "________\n");
     return wrt_chars;
 }
 
@@ -72,7 +72,7 @@ int main(void)
     time(&rawtime);
     timeinfo = localtime(&rawtime);
     update_binary_clock_array_with_hh_mm_ss(timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-    update_binary_clock_buffer_from_array();
+    update_binary_clock_buffer_from_array(timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
     printf("%s", buf);
 
     return 0;

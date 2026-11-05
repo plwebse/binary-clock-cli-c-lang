@@ -11,7 +11,7 @@ LDFLAGS  :=
 SRC_DIR  := src
 INC_DIR  := include
 BUILD_DIR:= build
-TARGET   := binary_clock
+TARGET   := binary-clock
 
 # Find all .c files in SRC_DIR and map them to .o object files in BUILD_DIR
 SRCS     := $(wildcard $(SRC_DIR)/*.c)
