@@ -14,12 +14,13 @@ V HHMMSS
 
 Install (Linux and OSX):
 
-1. git clone https://github.com/plwebse/binary-clock-cli-c-lang.git
-2. cd binary-clock-cli-c-lang
-3. make
-4. sudo make install
-5. binary-clock
+1. Clone the source code repo to your current directory:  `$ git clone https://github.com/plwebse/binary-clock-cli-c-lang.git`
+2. `$ cd binary-clock-cli-c-lang`
+3. `$ make`
+4. `$ sudo make install`
+5. Execute the program `$ binary-clock` 
+6. Optionally append the option `-c` flag $ `$ binary-clock -c` for the program rerender every second
 
 Uninstall (Linux and OSX):
 
-1. sudo make uninstall
+1. `$ sudo make uninstall`
