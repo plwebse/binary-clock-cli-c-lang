@@ -55,9 +55,9 @@ void render_binary_clock_to_buffer(int hours, int minutes, int seconds)
 {
     size_t wrt_chars = 0;
 
-    append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "%02d:%02d:%02d\n", hours, minutes, seconds);
-    append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "--------\n");
-    append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "V HHMMSS\n");
+    append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "%02d:%02d:%02d\033[K\n", hours, minutes, seconds);
+    append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "--------\033[K\n");
+    append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "V HHMMSS\033[K\n");
     for (unsigned int r = 0; r < ROWS; r++)
     {
         append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "%d ", (1 << (3 - (int)r)));
@@ -65,7 +65,7 @@ void render_binary_clock_to_buffer(int hours, int minutes, int seconds)
         {
             append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "%d", binary_clock_arr[c][r]);
         }
-        append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "\n");
+        append_to_buffer(buf, BUFFER_SIZE, &wrt_chars, "\033[K\n");
     }
 }
 
@@ -87,20 +87,27 @@ int main(int argc, char *argv[])
     // Handle CTRL-C
     signal(SIGINT, handle_sigint);
 
-    // Clear screen and hide cursor
-    fputs("\033[?25l", stdout);
-    fflush(stdout);
+    if (continuous)
+    {
+        // Clear screen and hide cursor
+        fputs("\033[2J\033[?25l", stdout);
+        fflush(stdout);
+    }
 
     do
     {
-        time_t rawtime;
+        time_t rawtime = time(NULL);
         struct tm *timeinfo;
         time(&rawtime);
         timeinfo = localtime(&rawtime);
         update_array_and_render_to_buffer(timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 
-        // Reposition cursor to top-left and render
-        fputs("\033[H", stdout);
+        if (continuous)
+        {
+            // Reposition cursor to top-left and render
+            fputs("\033[H", stdout);
+        }
+
         fputs(buf, stdout);
         fflush(stdout);
 
@@ -108,11 +115,14 @@ int main(int argc, char *argv[])
         {
             sleep(1);
         }
-    } while (keep_running && continuous);
+    } while (continuous && keep_running);
 
-    // Show the cursor
-    fputs("\033[?25h\n", stdout);
-    fflush(stdout);
+    if (continuous)
+    {
+        // Show the cursor
+        fputs("\033[?25h\n", stdout);
+        fflush(stdout);
+    }
 
     return 0;
 }
