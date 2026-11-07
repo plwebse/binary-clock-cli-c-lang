@@ -6,6 +6,12 @@ CFLAGS   := -Wall -Wextra -Werror -std=c99 -pedantic -g
 LDFLAGS  := 
 
 # ==============================================================================
+# Installation Paths (Standard POSIX layout)
+# ==============================================================================
+PREFIX   ?= /usr/local
+BINDIR   := $(PREFIX)/bin
+
+# ==============================================================================
 # Directories & Files
 # ==============================================================================
 SRC_DIR  := src
@@ -24,7 +30,7 @@ CFLAGS   += -I$(INC_DIR)
 # ==============================================================================
 # Rules
 # ==============================================================================
-.PHONY: all clean fclean re run
+.PHONY: all clean fclean re run install uninstall
 
 # Default target
 all: $(TARGET)
@@ -63,3 +69,16 @@ fclean: clean
 
 # Rebuild everything from scratch
 re: fclean all
+
+# Copy the executable to the system binary directory
+install: $(TARGET)
+	@echo "Installing $(TARGET) to $(DESTDIR)$(BINDIR)..."
+	@mkdir -p $(DESTDIR)$(BINDIR)
+	@install -m 755 $(TARGET) $(DESTDIR)$(BINDIR)/$(TARGET)
+	@echo "Installation complete."
+
+# Remove the executable from the system binary directory
+uninstall:
+	@echo "Removing $(TARGET) from $(DESTDIR)$(BINDIR)..."
+	@rm -f $(DESTDIR)$(BINDIR)/$(TARGET)
+	@echo "Uninstall complete."
